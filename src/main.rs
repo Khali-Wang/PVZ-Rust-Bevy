@@ -6,10 +6,10 @@ mod systems;
 mod core;
 mod asset_loader;
 mod ui;
+mod plugin;
 
 use asset_loader::AssetLoaderPlugin;
-use core::grid::MapPlugin;
-use ui::camera::CameraPlugin;
+use plugin::GamePlugin;
 
 fn main() {
     App::new()
@@ -22,8 +22,7 @@ fn main() {
         .add_plugins(DefaultPlugins) // used for AssetLoader
         //user defined plugins:
         .add_plugins(AssetLoaderPlugin)
-        .add_plugins(CameraPlugin)
-        .add_plugins(MapPlugin)
+        .add_plugins(GamePlugin)
         .run();
 
 }

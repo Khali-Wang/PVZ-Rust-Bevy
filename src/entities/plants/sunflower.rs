@@ -11,7 +11,6 @@ use crate::asset_loader::SceneAssets;
 
 const SUNFLOWER_HEALTH: i32 = 100;
 const SUNFLOWER_COST: i32 = 50;
-// const SUNFLOWER_ATTACK_RANGE : i32 = 100;
 
 /**
  * Sunflower produces sunshine.

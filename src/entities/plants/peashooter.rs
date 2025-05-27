@@ -11,7 +11,7 @@ use crate::asset_loader::SceneAssets;
 
 const PEASHOOTER_HEALTH: i32 = 100;
 const PEASHOOTER_COST: i32 = 100;
-const PEASHOOTER_ATTACK_RANGE : i32 = 100;
+const PEASHOOTER_ATTACK_RANGE : i32 = 10;
 
 /**
  * PeaShooter which can shoot bullets and hurt zombies.

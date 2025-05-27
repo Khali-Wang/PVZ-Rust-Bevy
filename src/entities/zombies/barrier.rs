@@ -10,15 +10,39 @@ use super::zombiebundle::ZombieBundle;
 
 use crate::asset_loader::SceneAssets;
 
+const BARRIER_ZOMBIE_HEALTH : i32 = 300;
+const BARRIER_ZOMBIE_VELOCITY : Vec3 = Vec3::new(0.0, 0.0, 0.0);// TODO: set Zombie's Velocity.
+const BARRIER_ZOMBIE_ATTACK_DAMAGE : i32 = 17;
+const BARRIER_ZOMBIE_ATTACK_RANGE : i32 = 1;
+
+
 /**
- * Basic zombie with lower health, velocity and attackdamage.
+ * Barrier zombie with higher health, normal velocity and attackdamage.
  */
 
-#[derive(Debug, Bundle)]
-pub struct BarrierZombie {
-    health: Health,
-    velocity: Velocity,
-    attack_damage: AttackDamage,
-    attack_range: AttackRange,
-    tag: Zombie,
+#[derive(Debug, Component)]
+pub struct BarrierZombie;
+// BarrierZombie contains {
+//     health: Health,
+//     velocity: Velocity,
+//     attack_damage: AttackDamage,
+//     attack_range: AttackRange,
+//     tag: Zombie,
+//     Marker: BarrierZombie,
+// }
+
+fn spawn_barrier_zombie(mut commands: Commands, scene_assets: Res<SceneAssets>) {
+    commands.spawn((
+        ZombieBundle {
+            health: Health(BARRIER_ZOMBIE_HEALTH),
+            velocity : Velocity(BARRIER_ZOMBIE_VELOCITY), 
+            attack_damage: AttackDamage(BARRIER_ZOMBIE_ATTACK_DAMAGE),
+            attack_range: AttackRange(BARRIER_ZOMBIE_ATTACK_RANGE),
+            model : SceneRoot(
+                scene_assets.zombie.clone(),
+            ),
+        },
+        Zombie,
+        BarrierZombie,
+    ));
 }

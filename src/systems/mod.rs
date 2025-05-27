@@ -1,3 +1,5 @@
 pub mod moving;
 pub mod attack;
-pub mod sunshine_generation;
+pub mod sunshine;
+pub mod plants;
+pub mod zombies;

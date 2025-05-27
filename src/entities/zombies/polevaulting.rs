@@ -10,30 +10,35 @@ use super::zombiebundle::ZombieBundle;
 
 use crate::asset_loader::SceneAssets;
 
+const PV_ZOMBIE_HEALTH : i32 = 100;
+const PV_ZOMBIE_VELOCITY : Vec3 = Vec3::new(0.0, 0.0, 0.0);// TODO: set Zombie's Velocity.
+const PV_ZOMBIE_ATTACK_DAMAGE : i32 = 17;
+const PV_ZOMBIE_ATTACK_RANGE : i32 = 1;
+
+
 /**
- * Basic zombie with lower health, velocity and attackdamage.
+ * PoleVaulting zombie with higher health, velocity and attackdamage.
+ * and it can Jump over the first plant it encounters.
  */
 
 #[derive(Debug, Component)]
 pub struct PoleVaultingZombie;
-
 // PoleVaultingZombie contains {
 //     health: Health,
 //     velocity: Velocity,
 //     attack_damage: AttackDamage,
 //     attack_range: AttackRange,
-//     Zombie,
-//     PoleVaultingZombie,
+//     tag: Zombie,
+//     Marker: BasicZombie,
 // }
-
 
 fn spawn_polevaulting(mut commands: Commands, scene_assets: Res<SceneAssets>) {
     commands.spawn((
         ZombieBundle {
-            health: Health(100),
-            attack_damage: AttackDamage(16),
-            attack_range: AttackRange(1),
-            velocity: Velocity(Vec3::ZERO), // TODO: modified the Velocity
+            health: Health(PV_ZOMBIE_HEALTH),
+            velocity : Velocity(PV_ZOMBIE_VELOCITY), 
+            attack_damage: AttackDamage(PV_ZOMBIE_ATTACK_DAMAGE),
+            attack_range: AttackRange(PV_ZOMBIE_ATTACK_RANGE),
             model : SceneRoot(
                 scene_assets.zombie.clone(),
             ),
@@ -42,4 +47,3 @@ fn spawn_polevaulting(mut commands: Commands, scene_assets: Res<SceneAssets>) {
         PoleVaultingZombie,
     ));
 }
-

@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-const TARGET_X : f32 = 8.0;
+const TARGET_X : f32 = 8.0; // x of camera target point
 const TARGET_Z : f32 = 6.0;
 
 const CAMERA_DISTANCE: f32 = 20.0;
