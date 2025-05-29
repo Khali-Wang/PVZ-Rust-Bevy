@@ -17,6 +17,11 @@ const SUNFLOWER_COST: i32 = 50;
  */
 #[derive(Debug, Component)]
 pub struct Sunflower;
+
+#[derive(Debug, Component)]
+pub struct SunflowerTimer(pub Timer);
+
+
 // Sunflower contains {
 //     health: Health,
 //     cost: Cost,
@@ -35,6 +40,7 @@ fn spawn_sunflower(mut commands: Commands, scene_assets: Res<SceneAssets>) {
         },
         Plant,
         Sunflower,
+        SunflowerTimer(Timer::from_seconds(5.0, TimerMode::Repeating)),
     ));
 }
 

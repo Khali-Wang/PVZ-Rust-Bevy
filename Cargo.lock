@@ -3270,6 +3270,7 @@ name = "plants_vs_zombies"
 version = "0.1.0"
 dependencies = [
  "bevy",
+ "rand",
 ]
 
 [[package]]

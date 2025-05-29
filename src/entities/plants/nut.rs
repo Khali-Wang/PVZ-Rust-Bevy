@@ -8,6 +8,9 @@ use super::plantbundle::PlantBundle;
 
 use crate::asset_loader::SceneAssets;
 
+const NUT_HEALTH: i32 = 500;
+const NUT_COST: i32 = 50;
+
 /**
  * Wall-Nut with high-level value of Health.
  */
@@ -25,8 +28,8 @@ pub struct Nut;
 fn spawn_nut(mut commands: Commands, scene_assets: Res<SceneAssets>) {
     commands.spawn((
         PlantBundle {
-            health: Health(500),
-            cost: Cost(50),
+            health: Health(NUT_HEALTH),
+            cost: Cost(NUT_COST),
             model : SceneRoot(
                 scene_assets.nut.clone(),
             ),

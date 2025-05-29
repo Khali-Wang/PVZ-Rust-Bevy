@@ -16,3 +16,5 @@ impl Plugin for ZombieLogicPlugin {
 // fn zombie_eat_your_brain
 
 // fn zombie_dies_animation
+
+// fn spawn_zombies_from_right

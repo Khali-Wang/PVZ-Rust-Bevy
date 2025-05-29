@@ -3,3 +3,4 @@ pub mod attack;
 pub mod sunshine;
 pub mod plants;
 pub mod zombies;
+pub mod despawn;

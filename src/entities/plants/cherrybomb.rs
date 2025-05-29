@@ -9,6 +9,10 @@ use super::plantbundle::PlantBundle;
 
 use crate::asset_loader::SceneAssets;
 
+const CHERRYBOMB_HEALTH: i32 = 100;
+const CHERRYBOMB_COST: i32 = 150;
+const CHERRYBOMB_DAMAGE: i32 = 1000;
+
 /**
  * CherryBomb that can kill all zombies in area 9 * 9.
  */
@@ -26,13 +30,13 @@ pub struct CherryBomb; // Marker to CherryBomb
 fn spawn_cherrybomb(mut commands: Commands, scene_assets: Res<SceneAssets>) {
     commands.spawn((
         PlantBundle {
-            health: Health(100),
-            cost: Cost(150),
+            health: Health(CHERRYBOMB_HEALTH),
+            cost: Cost(CHERRYBOMB_COST),
             model : SceneRoot(
                 scene_assets.cherrybomb.clone(),
             ),
         },
-        AttackDamage(1000), // use 1000 to kill all kinds of zombies immediately.
+        AttackDamage(CHERRYBOMB_DAMAGE), // use 1000 to kill all kinds of zombies immediately.
         Plant,
         CherryBomb,
     ));

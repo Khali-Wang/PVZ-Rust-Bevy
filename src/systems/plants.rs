@@ -16,6 +16,6 @@ impl Plugin for PlantLogicPlugin {
     }
 }
 
-fn cherrybomb_explode(mut query: Query<(&CherryBomb)>) {
-
+fn cherrybomb_explode(mut query: Query<(&CherryBomb, &Transform)>) {
+    todo!();
 }
