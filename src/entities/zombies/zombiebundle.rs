@@ -13,6 +13,7 @@ use crate::components::velocity::Velocity;
 
 #[derive(Bundle, Debug)]
 pub struct ZombieBundle {
+    pub translation: Transform,
     pub health: Health,
     pub velocity: Velocity,
     pub attack_range: AttackRange,

@@ -2,7 +2,17 @@ use bevy::prelude::*;
 
 use crate::core::grid::MapPlugin;
 
-use crate::ui::camera::CameraPlugin;
+use crate::systems::sunshine::SunshinePlugin;
+use crate::systems::{
+    zombies::ZombieLogicPlugin,
+    moving::MovingLogicPlugin,
+};
+
+use crate::ui::{
+    camera::CameraPlugin,
+    mouse::MousePlugin,
+    spawn_panel::PanelSpawnPlugin,
+};
 /**
  * Plugins collections, avoid modifing main.rs.
  */
@@ -15,8 +25,14 @@ impl Plugin for GamePlugin {
         .add_plugins(( // core Plugins
             MapPlugin,
         ))
+        .add_plugins(( // systems Plugins
+            ZombieLogicPlugin,
+            MovingLogicPlugin,
+            SunshinePlugin,
+        ))
         .add_plugins(( // ui Plugins
             CameraPlugin,
+            MousePlugin,
         ))
         ;
     }

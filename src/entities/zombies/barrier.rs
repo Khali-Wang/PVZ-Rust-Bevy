@@ -22,27 +22,28 @@ const BARRIER_ZOMBIE_ATTACK_RANGE : i32 = 1;
 
 #[derive(Debug, Component)]
 pub struct BarrierZombie;
-// BarrierZombie contains {
-//     health: Health,
-//     velocity: Velocity,
-//     attack_damage: AttackDamage,
-//     attack_range: AttackRange,
-//     tag: Zombie,
-//     Marker: BarrierZombie,
+
+
+// fn spawn_barrier_zombie(mut commands: Commands, scene_assets: Res<SceneAssets>) {
+//     commands.spawn((
+//         ZombieBundle {
+//             health: Health(BARRIER_ZOMBIE_HEALTH),
+//             velocity : Velocity(BARRIER_ZOMBIE_VELOCITY), 
+//             attack_damage: AttackDamage(BARRIER_ZOMBIE_ATTACK_DAMAGE),
+//             attack_range: AttackRange(BARRIER_ZOMBIE_ATTACK_RANGE),
+//             model : SceneRoot(
+//                 scene_assets.zombie.clone(),
+//             ),
+//         },
+//         Zombie,
+//         BarrierZombie,
+//     ));
 // }
 
-fn spawn_barrier_zombie(mut commands: Commands, scene_assets: Res<SceneAssets>) {
-    commands.spawn((
-        ZombieBundle {
-            health: Health(BARRIER_ZOMBIE_HEALTH),
-            velocity : Velocity(BARRIER_ZOMBIE_VELOCITY), 
-            attack_damage: AttackDamage(BARRIER_ZOMBIE_ATTACK_DAMAGE),
-            attack_range: AttackRange(BARRIER_ZOMBIE_ATTACK_RANGE),
-            model : SceneRoot(
-                scene_assets.zombie.clone(),
-            ),
-        },
-        Zombie,
-        BarrierZombie,
-    ));
+
+#[derive(Debug, Bundle)]
+pub struct BarrierZombieBundle {    
+    pub zombie_bundle: ZombieBundle,
+    pub tag: Zombie,
+    pub barrier_zombie: BarrierZombie,
 }

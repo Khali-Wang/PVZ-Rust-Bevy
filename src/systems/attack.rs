@@ -18,6 +18,9 @@ impl Plugin for AttackLogicPlugin {
 
 // Transform + AttackRange >= enemy distance, do attack logic.
 
-fn attack_control(mut query: Query<(&AttackRange, &Transform)>, time: Res<Time>) {
+fn attack_control(
+    mut query: Query<(&AttackRange, &Transform)>, 
+    time: Res<Time>
+) {
     todo!();
 }

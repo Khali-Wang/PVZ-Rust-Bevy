@@ -13,5 +13,6 @@ use crate::components::attack_attributes::AttackDamage;
 pub struct PlantBundle {
     pub health: Health,
     pub cost: Cost,
+    pub translation: Transform,
     pub model: SceneRoot,
 }

@@ -1,16 +1,9 @@
 use bevy::prelude::*;
 
-use crate::components::health::Health;
-use crate::components::cost::Cost;
 use crate::components::tags::Plant;
-
 
 use super::plantbundle::PlantBundle;
 
-use crate::asset_loader::SceneAssets;
-
-const SUNFLOWER_HEALTH: i32 = 100;
-const SUNFLOWER_COST: i32 = 50;
 
 /**
  * Sunflower produces sunshine.
@@ -22,25 +15,35 @@ pub struct Sunflower;
 pub struct SunflowerTimer(pub Timer);
 
 
-// Sunflower contains {
-//     health: Health,
-//     cost: Cost,
-//     Plant,
-//     Sunflower,
+// spawn can't be called in a system, so we use a bundle instead.
+
+
+// fn spawn_sunflower(
+//     mut commands: Commands, 
+//     scene_assets: Res<SceneAssets>,
+//     translation: Transform,
+// ) {
+//     commands.spawn((
+//         PlantBundle {
+//             translation,
+//             health: Health(SUNFLOWER_HEALTH),
+//             cost: Cost(SUNFLOWER_COST),
+//             model : SceneRoot(
+//                 scene_assets.sunflower.clone(),
+//             ),
+//         },
+//         Plant,
+//         Sunflower,
+//         SunflowerTimer(Timer::from_seconds(SUNFLOWER_PRODUCE_INTERVAL, TimerMode::Repeating)),
+//     ));
 // }
 
-fn spawn_sunflower(mut commands: Commands, scene_assets: Res<SceneAssets>) {
-    commands.spawn((
-        PlantBundle {
-            health: Health(SUNFLOWER_HEALTH),
-            cost: Cost(SUNFLOWER_COST),
-            model : SceneRoot(
-                scene_assets.sunflower.clone(),
-            ),
-        },
-        Plant,
-        Sunflower,
-        SunflowerTimer(Timer::from_seconds(5.0, TimerMode::Repeating)),
-    ));
+#[derive(Debug, Bundle)]
+pub struct SunflowerBundle {
+    pub plant_bundle: PlantBundle,
+    pub sunflower: Sunflower,
+    pub sunflower_timer: SunflowerTimer,
+    pub tag: Plant,
 }
+
 

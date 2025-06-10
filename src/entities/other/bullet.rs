@@ -20,20 +20,27 @@ struct BulletBundle {
 }
 
 
-fn spawn_pea_bullet(
-    mut commands: Commands, 
-    scene_assets: Res<SceneAssets>,
-    position: Transform,
-) {
-    commands.spawn((
-        BulletBundle {
-            position, // same as peashooter's position
-            velocity: Velocity(BULLET_VELOCITY),
-            attack_damage: AttackDamage(BULLET_ATTACK_DAMAGE),
-        },
-        SceneRoot(
-            scene_assets.peabullet.clone(),
-        ),
-    ));
-}
+// fn spawn_pea_bullet(
+//     mut commands: Commands, 
+//     scene_assets: Res<SceneAssets>,
+//     position: Transform,
+// ) {
+//     commands.spawn((
+//         BulletBundle {
+//             position, // same as peashooter's position
+//             velocity: Velocity(BULLET_VELOCITY),
+//             attack_damage: AttackDamage(BULLET_ATTACK_DAMAGE),
+//         },
+//         SceneRoot(
+//             scene_assets.peabullet.clone(),
+//         ),
+//     ));
+// }
 
+#[derive(Debug, Bundle)]
+pub struct PeaBullet {
+    pub position: Transform,
+    pub velocity: Velocity,
+    pub attack_damage: AttackDamage,
+    pub model: SceneRoot,
+}
