@@ -1,7 +1,5 @@
 use bevy::prelude::*;
 use crate::components::health::Health;
-use crate::components::cost::Cost;
-use crate::components::attack_attributes::AttackDamage;
 
 
 /**
@@ -12,7 +10,6 @@ use crate::components::attack_attributes::AttackDamage;
 #[derive(Bundle, Debug)]
 pub struct PlantBundle {
     pub health: Health,
-    pub cost: Cost,
     pub translation: Transform,
     pub model: SceneRoot,
 }

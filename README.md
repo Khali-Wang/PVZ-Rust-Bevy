@@ -28,7 +28,7 @@ cargo run --release
 
 ---
 
-## 项目结构 TODO
+## 项目结构
 
 ```plaintext  
 plants_vs_zombies/  

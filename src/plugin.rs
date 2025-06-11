@@ -6,6 +6,8 @@ use crate::systems::sunshine::SunshinePlugin;
 use crate::systems::{
     zombies::ZombieLogicPlugin,
     moving::MovingLogicPlugin,
+    plants::PlantLogicPlugin,
+    despawn::DespawnPlugin,
 };
 
 use crate::ui::{
@@ -29,10 +31,13 @@ impl Plugin for GamePlugin {
             ZombieLogicPlugin,
             MovingLogicPlugin,
             SunshinePlugin,
+            PlantLogicPlugin,
+            DespawnPlugin,
         ))
         .add_plugins(( // ui Plugins
             CameraPlugin,
             MousePlugin,
+            PanelSpawnPlugin,
         ))
         ;
     }

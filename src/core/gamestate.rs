@@ -3,7 +3,7 @@ use bevy::prelude::*;
  * When all Zombies are killed, or Zombie gets to the left edge of maps, Game is over.
  */
 #[derive(States, Debug, Clone, Eq, PartialEq, Hash)]
-enum GameState {
+pub enum GameState {
     Loading,
     Running,
     Pausing,

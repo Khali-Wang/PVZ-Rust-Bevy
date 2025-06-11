@@ -1,11 +1,17 @@
+/**
+ *  ------- Special Zombie Logic System -------
+ */
 // -------- Use statements ---------
 use bevy::prelude::*;
 use std::env;
 use rand::Rng;
 
+use crate::core::gamestate::GameState;
+
 use crate::components::{
     attack_attributes::AttackDamage,
     attack_attributes::AttackRange, 
+    tags::Plant,
     tags::Zombie,
     health::Health,
     velocity::Velocity
@@ -15,10 +21,12 @@ use crate::entities::{
     zombies::zombiebundle::ZombieBundle,
     zombies::basic::BasicZombieBundle,
     zombies::basic::BasicZombie,
+    zombies::polevaulting::PoleVaultingZombie,
+    zombies::polevaulting::CanJump,
 };
 use crate::{asset_loader::SceneAssets};
+
 /**
- * Handle Special Zombies' logics, like jump over the first plant...
  *  -------  Zombie Logic Plugin -------
  */
 pub struct ZombieLogicPlugin;
@@ -27,7 +35,8 @@ impl Plugin for ZombieLogicPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Update, spawn_zombies_from_right)
             .insert_resource(ZombieSpawnTimer(Timer::from_seconds(1.0, TimerMode::Repeating)))
-            // .add_systems(Update, zombie_eat_your_brain)
+            .add_systems(Update, zombie_eat_your_brain)
+            .add_systems(Update, pole_vaulting_jump)
             // .add_systems(Update, zombie_dies_animation);
             ;
     }
@@ -38,14 +47,11 @@ impl Plugin for ZombieLogicPlugin {
 pub struct ZombieSpawnTimer(pub Timer);
 
 
-
-// fn pole_vaulting_jump
-
-// fn zombie_eat_your_brain
-
 // fn zombie_dies_animation
-
-// fn spawn_zombies_from_right
+/**
+ *  ------- Spawn Zombies from Right -------
+ *  Spawns zombies from the right side of the grid at regular intervals.
+ */
 pub fn spawn_zombies_from_right(
     mut commands: Commands,
     scene_assets: Res<SceneAssets>,
@@ -85,4 +91,48 @@ pub fn spawn_zombies_from_right(
         });
     }
     
+}
+
+
+
+fn zombie_eat_your_brain(
+    query: Query<&Transform, With<Zombie>>,
+) {
+    for transform in query.iter() {
+        // Logic for zombies eating plants or brains
+        // This is a placeholder for the actual logic
+        let x = transform.translation.x;
+        if x >= 16.0 {
+            println!("Zombie ate your brain!: {:?}", transform.translation);
+        }
+    }
+}
+
+
+fn pole_vaulting_jump(
+    mut commands: Commands,
+    query_zombie: Query<(&Transform, &CanJump), With<PoleVaultingZombie>>,
+    query_plant: Query<&Transform, With<Plant>>,
+    time: Res<Time>,
+    scene_assets: Res<SceneAssets>,
+) {
+    for (zombie_transform, can_jump) in query_zombie.iter() {
+        if can_jump.0 {
+            for plant_transform in query_plant.iter() {
+                let distance = zombie_transform.translation.distance(plant_transform.translation);
+                if distance < 1.0 { // If the zombie is close enough to the plant
+                    // Jump over the plant
+                    let jump_height = 2.0; // Height of the jump
+                    commands.spawn((
+                        Transform::from_xyz(zombie_transform.translation.x, jump_height, zombie_transform.translation.z),
+                        Velocity(Vec3::new(0.5, 0.0, 0.0)), // Continue moving forward
+                        SceneRoot(scene_assets.zombie.clone()),
+                        PoleVaultingZombie,
+                    ));
+                    println!("PoleVaulting Zombie jumped over a plant at {:?}", zombie_transform.translation);
+                    break; // Only jump over the first plant encountered
+                }
+            }
+        }
+    }
 }

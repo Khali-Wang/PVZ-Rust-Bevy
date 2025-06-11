@@ -1,126 +1,385 @@
 use bevy::prelude::*;
+use crate::asset_loader::SceneAssets;
+
+use crate::core::grid::Grid;
+
+use crate::components::{
+    tags::Plant,
+    health::Health,
+    attack_attributes::AttackRange,
+    attack_attributes::AttackDamage,
+};
+
+
+use crate::entities::plants::{
+    plantbundle::PlantBundle,
+
+    sunflower::SunflowerBundle,
+    sunflower::Sunflower,
+    sunflower::SunflowerTimer,
+
+    peashooter::PeaShooterBundle,
+    peashooter::PeaShooter,
+
+    cherrybomb::CherryBombBundle, 
+    cherrybomb::CherryBomb,
+
+    nut::NutBundle,
+    nut::Nut,
+};
+
+use crate::systems::sunshine::SunshineCount;
+
+use crate::ui::mouse::MyGroundCoords;
 
 pub struct PanelSpawnPlugin;
 
 impl Plugin for PanelSpawnPlugin {
     fn build(&self, app: &mut App) {
-        //app.add_systems(PostStartup, spawn_panel);
+        app.add_systems(PostStartup, spawn_panel)
+            .add_systems(Update, button_system)
+            .add_systems(Update, place_plant_to_grid)
+            .insert_resource(PlantToBePlaced(None))
+        ;
     }
 }
 
-enum CurrentPlant {
-    Cur_Sunflower,
-    Cur_Peashooter,
-    Cur_CherryBomb,
-    Cur_Nut,
+// Plant selected by the player.
+#[derive(Clone, Copy, Debug)]
+pub enum CurrentPlant {
+    Sunflower_,
+    Peashooter_,
+    CherryBomb_,
+    Nut_,
 }
 
 // use Option<CurrentPlant> to handle null.
 #[derive(Resource)]
-pub struct PlantToBePlaced(Option<CurrentPlant>);
+pub struct PlantToBePlaced(
+    pub Option<CurrentPlant>
+);
+
+// used for button interaction.
+#[derive(Component)]
+enum ButtonFunction {
+    SpawnSunflower,
+    SpawnPeashooter,    
+    SpawnCherryBomb,
+    SpawnNut,
+}
+
+// Node with buttons for selecting plants.
+fn spawn_panel(
+    mut commands: Commands, 
+) {
+    commands
+        .spawn(
+            Node {
+                width: Val::Percent(100.0),
+                height: Val::Percent(15.0),
+                align_items: AlignItems::Center,
+                justify_content: JustifyContent::Center,
+                ..default()
+            }
+        )
+            // Sunflower
+        .with_children(|parent| {
+            parent.spawn((
+                ButtonFunction::SpawnSunflower,
+                Button,
+                Node {
+                    width: Val::Px(150.0),
+                    height: Val::Px(65.0),
+                    border: UiRect::all(Val::Px(5.0)),
+                    // horizontally center child text
+                    justify_content: JustifyContent::Center,
+                    // vertically center child text
+                    align_items: AlignItems::Center,
+                    ..default()
+                },
+                BorderColor(Color::BLACK),
+                BorderRadius::MAX,
+                BackgroundColor(Color::srgb(0.15, 0.15, 0.15)),
+                children![(
+                    Text::new("Sunflower"),
+                    TextColor(Color::srgb(0.9, 0.9, 0.9)),
+                    TextShadow::default(),
+                )]
+            ));
+
+            parent.spawn((
+                ButtonFunction::SpawnPeashooter,
+                Button,
+                Node {
+                    width: Val::Px(150.0),
+                    height: Val::Px(65.0),
+                    border: UiRect::all(Val::Px(5.0)),
+                    // horizontally center child text
+                    justify_content: JustifyContent::Center,
+                    // vertically center child text
+                    align_items: AlignItems::Center,
+                    ..default()
+                },
+                BorderColor(Color::BLACK),
+                BorderRadius::MAX,
+                BackgroundColor(Color::srgb(0.15, 0.15, 0.15)),
+                children![(
+                    Text::new("Peashooter"),
+                    TextColor(Color::srgb(0.9, 0.9, 0.9)),
+                    TextShadow::default(),
+                )]
+            ));
+
+            parent.spawn((
+                ButtonFunction::SpawnCherryBomb,
+                Button,
+                Node {
+                    width: Val::Px(150.0),
+                    height: Val::Px(65.0),
+                    border: UiRect::all(Val::Px(5.0)),
+                    // horizontally center child text
+                    justify_content: JustifyContent::Center,
+                    // vertically center child text
+                    align_items: AlignItems::Center,
+                    ..default()
+                },
+                BorderColor(Color::BLACK),
+                BorderRadius::MAX,
+                BackgroundColor(Color::srgb(0.15, 0.15, 0.15)),
+                children![(
+                    Text::new("Cherry Bomb"),
+                    TextColor(Color::srgb(0.9, 0.9, 0.9)),
+                    TextShadow::default(),
+                )]
+            ));
+
+            parent.spawn((
+                ButtonFunction::SpawnNut,
+                Button,
+                Node {
+                    width: Val::Px(150.0),
+                    height: Val::Px(65.0),
+                    border: UiRect::all(Val::Px(5.0)),
+                    // horizontally center child text
+                    justify_content: JustifyContent::Center,
+                    // vertically center child text
+                    align_items: AlignItems::Center,
+                    ..default()
+                },
+                BorderColor(Color::BLACK),
+                BorderRadius::MAX,
+                BackgroundColor(Color::srgb(0.15, 0.15, 0.15)),
+                children![(
+                    Text::new("Nut"),
+                    TextColor(Color::srgb(0.9, 0.9, 0.9)),
+                    TextShadow::default(),
+                )]
+            ));
+
+        });
+}
 
 
-// // 标记选择栏按钮
-// #[derive(Component)]
-// struct PlantButton(PlantType);
+fn button_system(
+    mut interaction_query: Query<
+        (
+            &Interaction,
+            &mut BackgroundColor,
+            &mut BorderColor,
+            &Children,
+            &ButtonFunction,
+        ),
+        (Changed<Interaction>, With<Button>),
+    >,
+    mut text_query: Query<&mut Text>,
+    mut plant_to_be_placed: ResMut<PlantToBePlaced>,
+    mut counter: ResMut<SunshineCount>,                 // judge whether the player has enough sunshine
+) {
+    for (interaction, mut color, mut border_color, children, func) in &mut interaction_query {
+        let mut text = text_query.get_mut(children[0]).unwrap();
+        match *interaction {
+            Interaction::Pressed => {
+                **text = "Press".to_string();
+                *color = Color::srgb(0.15, 0.0, 0.15).into();
+                border_color.0 = Color::WHITE;
+                match func {
+                    ButtonFunction::SpawnSunflower => {
+                        if counter.0 >= 50 {
+                            counter.0 -= 50; // Deduct sunshine cost
+                            plant_to_be_placed.0 = Some(CurrentPlant::Sunflower_);
+                            println!("Sunflower spawned! Remaining sunshine: {}, {:?}", counter.0, plant_to_be_placed.0.as_ref().unwrap());
+                        } else {
+                            println!("Not enough sunshine to place a Sunflower!");
+                            return; // Exit if not enough sunshine
+                        }
+                    }
+                    ButtonFunction::SpawnPeashooter => {
+                        if counter.0 >= 100 {
+                            counter.0 -= 100; // Deduct sunshine cost
+                            plant_to_be_placed.0 = Some(CurrentPlant::Peashooter_);
+                            println!("Peashooter spawned! Remaining sunshine: {}, {:?}", counter.0, plant_to_be_placed.0.as_ref().unwrap());
+                        } else {
+                            println!("Not enough sunshine to place a Peashooter!");
+                            return; // Exit if not enough sunshine
+                        }
+                    }
+                    ButtonFunction::SpawnCherryBomb => {
+                        if counter.0 >= 150 {
+                            counter.0 -= 150; // Deduct sunshine cost
+                            plant_to_be_placed.0 = Some(CurrentPlant::CherryBomb_);
+                        } else {
+                            println!("Not enough sunshine to place a Cherry Bomb!");
+                            return; // Exit if not enough sunshine
+                        }
+                    }
+                    ButtonFunction::SpawnNut => {
+                        if counter.0 >= 50 {
+                            counter.0 -= 50; // Deduct sunshine cost
+                            plant_to_be_placed.0 = Some(CurrentPlant::Nut_);
+                        } else {
+                            println!("Not enough sunshine to place a Nut!");
+                            return; // Exit if not enough sunshine
+                        }
+                    }
+                }
+            }
+            Interaction::Hovered => {
+                // **text = "Hover".to_string();
+                // *color = Color::srgb(0.5, 0.15, 0.15).into();
+                // border_color.0 = Color::WHITE;
+            }
+            Interaction::None => {
+                match func {
+                    ButtonFunction::SpawnSunflower => {
+                        **text = "Sunflower".to_string();
+                        *color = Color::srgb(0.0, 0.15, 0.15).into();
+                        border_color.0 = Color::BLACK;
+                    }
+                    ButtonFunction::SpawnPeashooter => {
+                        **text = "Peashooter".to_string();
+                        *color = Color::srgb(0.0, 0.15, 0.15).into();
+                        border_color.0 = Color::BLACK;
+                    }
+                    ButtonFunction::SpawnCherryBomb => {
+                        **text = "CherryBomb".to_string();
+                        *color = Color::srgb(0.0, 0.15, 0.15).into();
+                        border_color.0 = Color::BLACK;
+                    }
+                    ButtonFunction::SpawnNut => {
+                        **text = "Nut".to_string();
+                        *color = Color::srgb(0.0, 0.15, 0.15).into();
+                        border_color.0 = Color::BLACK;
+                    }
+                }
+            }
+        }
+    }
+}
 
-// // 标记跟随鼠标的植物
-// #[derive(Component)]
-// struct DraggingPlant;
 
 
-// 生成植物选择栏
-// fn spawn_panel(
-//     mut commands: Commands, 
-//     asset_server: Res<AssetServer>
-// ) {
-//     commands.spawn(NodeBundle {
-//         style: Style {
-//             size: Size::new(Val::Percent(100.0), Val::Px(100.0)),
-//             flex_direction: FlexDirection::Row,
-//             ..default()
-//         },
-//         background_color: Color::rgb(0.2, 0.2, 0.2).into(),
-//         ..default()
-//     })
-//     .with_children(|parent| {
-//         // 豌豆射手按钮
-//         parent.spawn((
-//             ButtonBundle {
-//                 style: Style {
-//                     size: Size::new(Val::Px(80.0), Val::Px(80.0)),
-//                     margin: UiRect::all(Val::Px(10.0)),
-//                     ..default()
-//                 },
-//                 background_color: Color::GREEN.into(),
-//                 ..default()
-//             },
-//             PlantButton(PlantType::Peashooter),
-//         ));
-//         // 向日葵按钮
-//         parent.spawn((
-//             ButtonBundle {
-//                 style: Style {
-//                     size: Size::new(Val::Px(80.0), Val::Px(80.0)),
-//                     margin: UiRect::all(Val::Px(10.0)),
-//                     ..default()
-//                 },
-//                 background_color: Color::YELLOW.into(),
-//                 ..default()
-//             },
-//             PlantButton(PlantType::Sunflower),
-//         ));
-//     });
-// }
+fn place_plant_to_grid(
+    mut commands: Commands,
+    mut plant_to_be_placed: ResMut<PlantToBePlaced>,           // get the plant to be placed
+    scene_assets: Res<SceneAssets>,                     // load plant models
+    mouse_input: Res<ButtonInput<MouseButton>>,         // get mouse input
+    my_ground_coords: Res<MyGroundCoords>,              // get mouse position
+    mut query_grid: Query<(&Transform, &Grid)>,         // get grid transform
+) {
+    if let Some(plant) = plant_to_be_placed.0 {
+        for (grid_transform, grid) in query_grid.iter_mut() {
+            let position = my_ground_coords.local;
 
-// // 点击按钮生成植物并跟随鼠标
-// fn plant_button_click(
-//     mut commands: Commands,
-//     interaction_query: Query<(&Interaction, &PlantButton), (Changed<Interaction>, With<Button>)>,
-//     mut windows: Query<&mut Window>,
-// ) {
-//     for (interaction, plant_button) in &interaction_query {
-//         if *interaction == Interaction::Pressed {
-//             // 获取鼠标位置
-//             if let Some(position) = windows.single_mut().cursor_position() {
-//                 // 生成一个跟随鼠标的植物实体
-//                 commands.spawn((
-//                     SpriteBundle {
-//                         transform: Transform::from_translation(Vec3::new(position.x, position.y, 1.0)),
-//                         sprite: Sprite {
-//                             color: match plant_button.0 {
-//                                 PlantType::Peashooter => Color::GREEN,
-//                                 PlantType::Sunflower => Color::YELLOW,
-//                             },
-//                             custom_size: Some(Vec2::new(60.0, 60.0)),
-//                             ..default()
-//                         },
-//                         ..default()
-//                     },
-//                     DraggingPlant,
-//                 ));
-//             }
-//         }
-//     }
-// }
+            let grid_position: Vec2 = Vec2::new(
+                grid_transform.translation.x, 
+                grid_transform.translation.z
+            );
 
-// // 让植物实体跟随鼠标
-// fn drag_plant_with_mouse(
-//     mut query: Query<&mut Transform, With<DraggingPlant>>,
-//     windows: Query<&Window>,
-//     mouse: Res<Input<MouseButton>>,
-//     mut commands: Commands,
-//     dragging_query: Query<Entity, With<DraggingPlant>>,
-// ) {
-//     if let Some(position) = windows.single().cursor_position() {
-//         for mut transform in &mut query {
-//             transform.translation = Vec3::new(position.x, position.y, 1.0);
-//         }
-//     }
-//     // 鼠标左键松开时，取消跟随
-//     if mouse.just_released(MouseButton::Left) {
-//         for entity in &dragging_query {
-//             commands.entity(entity).remove::<DraggingPlant>();
-//         }
-//     }
-// }
+            if position.distance(grid_position) > 0.5 || grid.0 == true
+            {
+                //println!("Cannot place plant here, either out of bounds or grid is occupied.");
+                continue;
+            } else {
+                if mouse_input.just_pressed(MouseButton::Left) {
+                    match plant {
+                        CurrentPlant::Sunflower_ => {
+                            println!("Placing Sunflower at {:?}", grid_position);
+                            // Spawn a sunflower at the specified position
+                            commands.spawn(SunflowerBundle {
+                                plant_bundle: PlantBundle {
+                                    translation: Transform::from_translation(Vec3::new(
+                                        grid_position.x, 1.0, grid_position.y
+                                    ))
+                                    .with_scale(Vec3::new(0.5, 0.5, 0.5)),
+                                    health: Health(100), // Example health value
+                                    model: SceneRoot(scene_assets.sunflower.clone()),
+                                },
+                                tag: Plant,
+                                sunflower: Sunflower,
+                                sunflower_timer: SunflowerTimer(Timer::from_seconds(10.0, TimerMode::Repeating))
+                            });
+
+                            plant_to_be_placed.0 = None; // Reset the plant to be placed
+                        }
+                        CurrentPlant::Peashooter_ => {
+                            // Spawn a peashooter at the specified position
+                            println!("Placing Peashooter at {:?}", grid_position);
+                            // Spawn a sunflower at the specified position
+                            commands.spawn(PeaShooterBundle {
+                                plant_bundle: PlantBundle {
+                                    translation: Transform::from_translation(Vec3::new(
+                                        grid_position.x, 1.0, grid_position.y
+                                    ))
+                                    .looking_at(Vec3::new(16.0, 0.0, grid_position.y), Vec3::Y)
+                                    .with_scale(Vec3::new(0.5, 0.5, 0.5)),
+                                    health: Health(100), // Example health value
+                                    model: SceneRoot(scene_assets.peashooter.clone()),
+                                },
+                                tag: Plant,
+                                pea_shooter: PeaShooter,
+                                attack_range: AttackRange(3), // Example attack range
+                            });
+
+                            plant_to_be_placed.0 = None; // Reset the plant to be placed
+                        }
+                        CurrentPlant::CherryBomb_ => {
+                            // Spawn a cherry bomb at the specified position
+                            println!("Placing Cherry Bomb at {:?}", grid_position);
+                            commands.spawn(CherryBombBundle {
+                                plant_bundle: PlantBundle {
+                                    translation: Transform::from_translation(Vec3::new(
+                                        grid_position.x, 1.0, grid_position.y
+                                    ))
+                                    .with_scale(Vec3::new(0.5, 0.5, 0.5)),
+                                    health: Health(100), // Example health value
+                                    model: SceneRoot(scene_assets.cherrybomb.clone()),
+                                },
+                                tag: Plant,
+                                cherry_bomb: CherryBomb,
+                                attack_damage: AttackDamage(1000), // Example damage value
+                            });
+                            plant_to_be_placed.0 = None; // Reset the plant to be placed
+                        }
+                        CurrentPlant::Nut_ => {
+                            // Spawn a nut at the specified position
+                            println!("Placing Nut at {:?}", grid_position);
+                            commands.spawn(NutBundle {
+                                plant_bundle: PlantBundle {
+                                    translation: Transform::from_translation(Vec3::new(
+                                        grid_position.x, 1.0, grid_position.y
+                                    ))
+                                    .with_scale(Vec3::new(0.5, 0.5, 0.5)),
+                                    health: Health(500), // Example health value
+                                    model: SceneRoot(scene_assets.nut.clone()),
+                                },
+                                tag: Plant,
+                                nut: Nut,
+                            });
+                            plant_to_be_placed.0 = None; // Reset the plant to be placed
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

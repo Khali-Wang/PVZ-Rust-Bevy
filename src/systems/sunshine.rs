@@ -80,8 +80,13 @@ fn sunflower_produce_sun(
         if timer.0.just_finished() {
             //spawn_sunshine(commands, scene_assets, Velocity(Vec3::ZERO), Transform::from_translation(transform.translation));
             // 由于Timer复用可以不用重置（用了TimerMode::Repeat）
+            println!("Sunflower produced sunshine at {:?}", transform.translation);
             commands.spawn(SunShineBundle{
-                position: Transform::from_translation(transform.translation),
+                position: Transform::from_xyz(
+                    transform.translation.x,
+                    2.0,
+                    transform.translation.z,
+                ),
                 velocity: Velocity(SUNSHINE_VELOCITY_FROM_SKY),
                 sunshine: SunShine,
                 model: SceneRoot(

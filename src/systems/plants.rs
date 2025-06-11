@@ -20,10 +20,11 @@ impl Plugin for PlantLogicPlugin {
 }
 
 fn cherrybomb_explode(
-    mut cherrybomb: Query<(&Transform, &AttackDamage), With<CherryBomb>>,
+    mut commands: Commands,
+    cherrybomb: Query<(Entity, &Transform, &AttackDamage), With<CherryBomb>>,
     mut zombies: Query<(&Transform, &mut Health), With<Zombie>>,
 ) {
-    for (cherry_transform, cherry_attackdamage) in cherrybomb.iter() {
+    for (entity, cherry_transform, cherry_attackdamage) in cherrybomb.iter() {
         for (zombie_transform, mut health) in zombies.iter_mut() {
             let cherry_translation = cherry_transform.translation;
             let zombie_translation = zombie_transform.translation;
@@ -37,6 +38,8 @@ fn cherrybomb_explode(
             if (cherry_x - zombie_x).abs() <= 3.0 && (cherry_z - zombie_z).abs() <= 3.0 {
                 health.0 -= cherry_attackdamage.0;
             }
+
+            commands.entity(entity).despawn();
         }
     }
 }

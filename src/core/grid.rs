@@ -10,7 +10,7 @@ const COL : i32 = 9;
  * Grids that can place plant, zombies occurs on the right of the grid.
 */
 #[derive(Debug, Component)]
-pub struct Grid(bool); // Marker, bool represents whether it is planted.
+pub struct Grid(pub bool); // Marker, bool represents whether it is planted.
 
 
 pub struct MapPlugin;
