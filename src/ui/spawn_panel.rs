@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use crate::asset_loader::SceneAssets;
 
+use crate::core::gamestate::GameState;
 use crate::core::grid::Grid;
 
 use crate::components::{
@@ -20,6 +21,7 @@ use crate::entities::plants::{
 
     peashooter::PeaShooterBundle,
     peashooter::PeaShooter,
+    peashooter::PeaShooterTimer,
 
     cherrybomb::CherryBombBundle, 
     cherrybomb::CherryBomb,
@@ -37,8 +39,11 @@ pub struct PanelSpawnPlugin;
 impl Plugin for PanelSpawnPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(PostStartup, spawn_panel)
-            .add_systems(Update, button_system)
-            .add_systems(Update, place_plant_to_grid)
+            .add_systems(Update, (
+                    button_system,
+                    place_plant_to_grid,
+                ).run_if(in_state(GameState::Running))
+        )
             .insert_resource(PlantToBePlaced(None))
         ;
     }
@@ -330,14 +335,15 @@ fn place_plant_to_grid(
                                     translation: Transform::from_translation(Vec3::new(
                                         grid_position.x, 1.0, grid_position.y
                                     ))
-                                    .looking_at(Vec3::new(16.0, 0.0, grid_position.y), Vec3::Y)
+                                    .looking_at(Vec3::new(32.0, 0.0, grid_position.y), Vec3::Y)
                                     .with_scale(Vec3::new(0.5, 0.5, 0.5)),
                                     health: Health(100), // Example health value
                                     model: SceneRoot(scene_assets.peashooter.clone()),
                                 },
                                 tag: Plant,
                                 pea_shooter: PeaShooter,
-                                attack_range: AttackRange(3), // Example attack range
+                                attack_range: AttackRange(10),
+                                pea_shooter_timer: PeaShooterTimer(Timer::from_seconds(2.0, TimerMode::Repeating)),
                             });
 
                             plant_to_be_placed.0 = None; // Reset the plant to be placed

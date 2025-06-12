@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::components::health::Health;
+use crate::{components::health::Health, core::gamestate::GameState};
 /**
  * If an Entity has Health, and Health < 0, despawn it in game.
  */
@@ -8,7 +8,7 @@ pub struct DespawnPlugin;
 
 impl Plugin for DespawnPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, despawn_health_le0_entities);
+        app.add_systems(Update, despawn_health_le0_entities.run_if(in_state(GameState::Running)));
     }
 }
 

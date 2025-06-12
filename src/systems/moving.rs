@@ -1,6 +1,9 @@
 use bevy::prelude::*;
 
-use crate::components::velocity::Velocity;
+use crate::{
+    components::velocity::Velocity, 
+    core::gamestate::GameState
+};
 
 /**
  * Used for zombies', bullets' moving logic.
@@ -9,7 +12,7 @@ pub struct MovingLogicPlugin;
 
 impl Plugin for MovingLogicPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, moving_control);
+        app.add_systems(Update, moving_control.run_if(in_state(GameState::Running)));
     }
 }
 

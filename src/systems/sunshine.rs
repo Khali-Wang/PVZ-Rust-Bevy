@@ -3,6 +3,8 @@ use rand::Rng;
 
 use crate::components::velocity::Velocity;
 
+use crate::core::gamestate::GameState;
+
 use crate::entities::other::sunshine::SunShine;
 use crate::entities::other::sunshine::SunShineBundle;
 use crate::entities::plants::sunflower::Sunflower;
@@ -19,11 +21,13 @@ pub struct SunshinePlugin;
 
 impl Plugin for SunshinePlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, sunshine_pickup)
-            .add_systems(Update, sunshine_generation_from_sky)
-            .add_systems(Update, sunflower_produce_sun)
-            .insert_resource(SunlightTimer(Timer::from_seconds(1.0, TimerMode::Repeating)))
-            .insert_resource(SunshineCount(0))
+        app.add_systems(Update, (
+                sunshine_pickup,
+                sunshine_generation_from_sky,
+                sunflower_produce_sun
+            ).run_if(in_state(GameState::Running)))
+            .insert_resource(SunlightTimer(Timer::from_seconds(10.0, TimerMode::Repeating)))
+            .insert_resource(SunshineCount(100))
         ;
     }
 }
@@ -115,7 +119,7 @@ fn sunshine_pickup(
         for (entity, transform) in sunshine_query.iter_mut() {
             let transform = transform.translation;
             let sunshine_position : Vec2 = Vec2::new(transform.x, transform.z);
-            if sunshine_position.distance(position) < 0.5 {
+            if sunshine_position.distance(position) < 1.0 {
                 // 如果有阳光在鼠标位置，销毁阳光实体并增加计数
                 counter.0 += 25;
                 println!("Sunshine picked up! Total count: {}", counter.0);
@@ -125,4 +129,5 @@ fn sunshine_pickup(
         }
     }
 }
+
 

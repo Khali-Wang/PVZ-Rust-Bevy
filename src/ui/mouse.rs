@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 
+use crate::core::gamestate::GameState;
 use crate::ui::camera::MyGameCamera;
 
 
@@ -11,7 +12,7 @@ impl Plugin for MousePlugin {
         app.init_resource::<MyGroundCoords>();
         app
         .add_systems(Startup, helper_global_transform) // helper to spawn the ground plane
-        .add_systems(Update, cursor_to_ground_plane)
+        .add_systems(Update, cursor_to_ground_plane.run_if(in_state(GameState::Running)))
         ;
     }
 }

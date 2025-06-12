@@ -1,19 +1,10 @@
 use bevy::prelude::*;
 
-use crate::components::health::Health;
-use crate::components::attack_attributes::AttackDamage;
-use crate::components::attack_attributes::AttackRange;
-use crate::components::velocity::Velocity;
+
 use crate::components::tags::Zombie;
 
 use super::zombiebundle::ZombieBundle;
 
-use crate::asset_loader::SceneAssets;
-
-const BARRIER_ZOMBIE_HEALTH : i32 = 300;
-const BARRIER_ZOMBIE_VELOCITY : Vec3 = Vec3::new(0.0, 0.0, 0.0);// TODO: set Zombie's Velocity.
-const BARRIER_ZOMBIE_ATTACK_DAMAGE : i32 = 17;
-const BARRIER_ZOMBIE_ATTACK_RANGE : i32 = 1;
 
 
 /**

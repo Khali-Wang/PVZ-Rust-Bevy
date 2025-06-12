@@ -12,6 +12,9 @@ use super::plantbundle::PlantBundle;
 #[derive(Debug, Component)]
 pub struct PeaShooter;
 
+#[derive(Debug, Component)]
+pub struct PeaShooterTimer(pub Timer);
+
 
 // fn spawn_peashoot(
 //     mut commands: Commands, 
@@ -39,4 +42,5 @@ pub struct PeaShooterBundle {
     pub attack_range: AttackRange,
     pub tag: Plant,
     pub pea_shooter: PeaShooter,
+    pub pea_shooter_timer: PeaShooterTimer,
 }

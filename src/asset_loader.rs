@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use crate::core::gamestate::GameState;
+
 
 /**
  * Load assets from disk Once rather than load when used.
@@ -7,6 +7,8 @@ use crate::core::gamestate::GameState;
 #[derive(Resource, Debug, Default)]
 pub struct SceneAssets { // represents all assets needed in project.
     pub zombie: Handle<Scene>, 
+    pub barrier: Handle<Scene>,
+    pub polevaulting: Handle<Scene>,
 
     pub peabullet: Handle<Scene>,
     pub grid: Handle<Scene>,
@@ -18,22 +20,12 @@ pub struct SceneAssets { // represents all assets needed in project.
     pub cherrybomb: Handle<Scene>,
 }
 
-#[derive(Resource, Debug, Default)]
-pub struct ImageAssets { // represents all assets needed in project.
-    pub peashooter: Handle<Image>,
-    pub sunflower: Handle<Image>,
-    pub nut: Handle<Image>,
-    pub cherrybomb: Handle<Image>,
-}
-
 pub struct AssetLoaderPlugin;
 
 impl Plugin for AssetLoaderPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<SceneAssets>()
-            .init_resource::<ImageAssets>()
-            .add_systems(Startup, load_assets)
-            .add_systems(Startup, load_image_assets);
+            .add_systems(Startup, load_assets);
     }
 }
 
@@ -49,16 +41,7 @@ fn load_assets(mut scene_assets: ResMut<SceneAssets>, asset_server: Res<AssetSer
         cherrybomb: asset_server.load(GltfAssetLabel::Scene(0).from_asset("plants\\CherryBomb.glb")),
 
         zombie: asset_server.load(GltfAssetLabel::Scene(0).from_asset("zombies\\Zombie.glb")),
+        barrier: asset_server.load(GltfAssetLabel::Scene(0).from_asset("zombies\\Barrier.glb")),
+        polevaulting: asset_server.load(GltfAssetLabel::Scene(0).from_asset("zombies\\PoleVaulting.glb")),
     }
 }
-
-
-fn load_image_assets(mut scene_assets: ResMut<ImageAssets>, asset_server: Res<AssetServer>) {
-    *scene_assets = ImageAssets {
-        peashooter: asset_server.load("plants/PeaShooter.png"),
-        sunflower: asset_server.load("plants/Sunflower.png"),
-        nut: asset_server.load("plants/Nut.png"),
-        cherrybomb: asset_server.load("plants/CherryBomb.png"),
-    }
-}
-

@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 
 use crate::{
+    core::gamestate::GameState,
     components::{attack_attributes::AttackDamage, health::Health, tags::Zombie}, 
     entities::plants::cherrybomb::CherryBomb
 };
@@ -15,7 +16,7 @@ pub struct PlantLogicPlugin;
 impl Plugin for PlantLogicPlugin {
     fn build(&self, app: &mut App) {
         app
-        .add_systems(Update, cherrybomb_explode);
+        .add_systems(Update, cherrybomb_explode.run_if(in_state(GameState::Running)));
     }
 }
 

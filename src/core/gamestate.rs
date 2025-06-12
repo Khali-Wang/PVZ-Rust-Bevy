@@ -1,10 +1,15 @@
 use bevy::prelude::*;
+
+use crate::core::gameprogress::GameProgress;
+
+use crate::components::tags::Zombie;
+
 /**
  * When all Zombies are killed, or Zombie gets to the left edge of maps, Game is over.
  */
-#[derive(States, Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(States, Default, Debug, Clone, Eq, PartialEq, Hash)]
 pub enum GameState {
-    Loading,
+    #[default]
     Running,
     Pausing,
     GameOver,
@@ -12,20 +17,18 @@ pub enum GameState {
 
 pub struct GameStatePlugin;
 
-// impl Plugin for GameStatePlugin {
-//     fn build(&self, app: &mut App) {
-//         app.add_state(GameState::Loading)
-//             .add_systems(
-//                 Update,
-//                 (
-//                     pause_system,
-//                     game_over_system,
-//                 )
-//                     .run_if(in_state(GameState::Running)),
-//             );
-//     }
-    
-// }
+impl Plugin for GameStatePlugin {
+    fn build(&self, app: &mut App) {
+        app.init_state::<GameState>()
+            .add_systems(
+                Update,
+                (
+                    pause_system,
+                    game_over_system,
+                )
+            );
+    }
+}
 
 /**
  * Pausing Game and recovering from Pausing. Using Escape.
@@ -56,16 +59,78 @@ fn pause_system(
  */
 pub fn game_over_system(
     mut commands: Commands,
-    game_state: ResMut<State<GameState>>,
+    query_zombie: Query<(), With<Zombie>>,
+    query: Query<&Transform, With<Zombie>>,
+    game_progress: Res<GameProgress>,
     mut next_state: ResMut<NextState<GameState>>,
 ) {
-    // Here you can add your logic to determine if the game is over
-    // For example, if all zombies are killed or a zombie reaches the left edge of the map
-    // This is just a placeholder condition
-    let game_over_condition = false; // Replace with actual condition
+    let mut game_over_condition = false;
+    let mut win = false;
+
+    for transform in query.iter() {
+        // Logic for zombies eating plants or brains
+        // This is a placeholder for the actual logic
+        let x = transform.translation.x;
+        if x >= 16.0 {
+            game_over_condition = true; // Set the condition to true if a zombie reaches the left edge
+            win = false;
+        }
+    }
+
+    if game_progress.progress >= 100 {
+        let mut zombie_cnt = 0;
+        for _ in query_zombie.iter() {
+            zombie_cnt += 1; // Count the number of zombies
+        }
+        if zombie_cnt == 0 {
+            win = true; // If no zombies left, player wins
+            game_over_condition = true; // Set the condition to true if progress exceeds 100
+        }
+    }
 
     if game_over_condition {
         next_state.set(GameState::GameOver);
         commands.insert_resource(ClearColor(Color::BLACK)); // Change background color to black on game over
+        commands
+        .spawn(
+            Node {
+                width: Val::Percent(100.0),
+                height: Val::Percent(100.0),
+                flex_direction: FlexDirection::Column,
+                align_items: AlignItems::Center,
+                justify_content: JustifyContent::Center,
+                ..default()
+            }
+        )
+            // Sunflower
+        .with_children(|parent| {
+            if win {
+                parent.spawn((
+                    Text::new(format!("Congratulations! You Win!")),
+                    TextFont {
+                        font_size: 40.0,
+                        ..default()
+                    },
+                    TextColor::WHITE,
+                    Node {
+                        margin: UiRect::horizontal(Val::Px(16.0)),
+                        ..default()
+                    },
+                ));
+            } else {
+                parent.spawn((
+                    Text::new(format!("Zombies ate your brains! Game Over!")),
+                    TextFont {
+                        font_size: 40.0,
+                        ..default()
+                    },
+                    TextColor::WHITE,
+                    Node {
+                        margin: UiRect::horizontal(Val::Px(16.0)),
+                        ..default()
+                    },
+                ));
+            }
+        });
     }
 }

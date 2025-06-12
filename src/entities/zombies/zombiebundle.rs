@@ -5,6 +5,8 @@ use crate::components::attack_attributes::AttackRange;
 use crate::components::attack_attributes::AttackDamage;
 use crate::components::velocity::Velocity;
 
+#[derive(Debug, Component)]
+pub struct ZombieAttackTimer(pub Timer);
 
 /**
  * Use Bundle as "templates" for creating entities.
@@ -18,6 +20,7 @@ pub struct ZombieBundle {
     pub velocity: Velocity,
     pub attack_range: AttackRange,
     pub attack_damage: AttackDamage,
+    pub attack_timer: ZombieAttackTimer,
     pub model: SceneRoot,
 }
 
